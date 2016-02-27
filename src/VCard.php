@@ -481,6 +481,16 @@ class VCard
     }
 
     /**
+     * Get charset
+     *
+     * @return string
+     */
+    public function getCharset()
+    {
+        return $this->charset;
+    }
+
+    /**
      * Get content type
      *
      * @return string
@@ -520,7 +530,7 @@ class VCard
      */
     public function getHeaders($asAssociative)
     {
-        $contentType        = $this->getContentType() . '; charset=' . $this->charset;
+        $contentType        = $this->getContentType() . '; charset=' . $this->getCharset();
         $contentDisposition = 'attachment; filename=' . $this->getFilename() . '.' . $this->getFileExtension();
         $contentLength      = strlen($this->getOutput());
         $connection         = 'close';
@@ -551,8 +561,15 @@ class VCard
      */
     public function getOutput()
     {
-        return ($this->isIOS7()) ?
+        $output = ($this->isIOS7()) ?
             $this->buildVCalendar() : $this->buildVCard();
+
+        // we need to decode the output for outlook
+        if ($this->getCharset() == 'utf-8') {
+            $output = utf8_decode($output);
+        }
+
+        return $output;
     }
 
     /**
@@ -620,6 +637,17 @@ class VCard
             $file,
             $this->getOutput()
         );
+    }
+
+    /**
+     * Set charset
+     *
+     * @param  mixed  $charset
+     * @return void
+     */
+    public function setCharset($charset)
+    {
+        $this->charset = $charset;
     }
 
     /**
